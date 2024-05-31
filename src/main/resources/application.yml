@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: api
+  datasource:
+    url: jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}?createDatabaseIfNotExist=true
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    initialization-mode: always
+  sql:
+    init:
+      mode: always
+  jpa:
+    properties:
+      hibernate:
+        hbm2ddl:
+          create_namespaces: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+    defer-datasource-initialization: true
+
+
+server:
+  servlet:
+    session:
+      cookie:
+        name: session
+logging:
+  level:
+    org:
+      springframework:
+        security: TRACE
+      hibernate: INFO
+
