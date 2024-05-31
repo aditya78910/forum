@@ -10,6 +10,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.coyote.BadRequestException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -22,6 +23,9 @@ import org.springframework.security.web.authentication.AbstractAuthenticationPro
 import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.Validator;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
@@ -32,6 +36,9 @@ import java.util.stream.Stream;
 @Slf4j
 @Component
 public class UsernamePasswordAuthenticationFilter extends OncePerRequestFilter {
+
+    @Autowired
+    Validator validator;
 
     private static final String LOGIN_ENDPOINT = "/login";
     @Autowired
@@ -56,12 +63,20 @@ public class UsernamePasswordAuthenticationFilter extends OncePerRequestFilter {
             UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken
                     = new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword());
 
+
+            BindingResult bindingResult = new BeanPropertyBindingResult(authRequest, "authRequest");
+            validator.validate(authRequest, bindingResult);
+
+            if (bindingResult.hasErrors()) {
+                response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Bad Request Exception");
+                return;
+            }
+
             try {
                 Authentication authenticated = customAuthenticationManager.authenticate(usernamePasswordAuthenticationToken);
                 SecurityContextHolder.getContext().setAuthentication(authenticated);
 
             }catch (AuthenticationFailedException ex){
-
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Authentication Failed");
             }
         }

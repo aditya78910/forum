@@ -40,8 +40,4 @@ public class Thread {
     @JoinColumn(name = "username")
     @JsonManagedReference
     private User user;
-
-    @OneToMany(mappedBy = "thread")
-    @JsonBackReference
-    private List<Post> posts;
 }

@@ -11,7 +11,7 @@ public class ThreadGetRequest {
     @NotEmpty(message = "Categories list must not be empty")
     @Size(min = 1, message = "Categories list must contain at least one element")
     private List<String> categories;
-    private int page = 0;
-    private int page_size = 10;
+    private Integer page;
+    private Integer page_size;
     private boolean newest_first;
 }

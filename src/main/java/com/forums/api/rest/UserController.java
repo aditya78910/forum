@@ -7,6 +7,8 @@ import com.forums.api.mapper.UserMapper;
 import com.forums.api.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,14 +22,8 @@ public class UserController {
     UserMapper userMapper;
 
     @PostMapping("/register")
-    public UserCreateResponseDTO registerUser(@Valid @RequestBody UserCreateRequestDTO userCreateRequestDTO){
+    public ResponseEntity<UserCreateResponseDTO> registerUser(@Valid @RequestBody UserCreateRequestDTO userCreateRequestDTO){
         User savedUser =  userService.createUser(userMapper.userCreateRequestDTO_to_user(userCreateRequestDTO));
-        return userMapper.user_to_userCreateResponseDTO(savedUser);
-    }
-
-    @GetMapping("/register")
-    public String test(){
-
-        return "just for test";
+        return new ResponseEntity<>(userMapper.user_to_userCreateResponseDTO(savedUser), HttpStatus.CREATED);
     }
 }

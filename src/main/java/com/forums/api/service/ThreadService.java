@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -45,13 +46,13 @@ public class ThreadService {
 
     public void createThreadWithInitialPost(ThreadCreateRequestDTO request, String username) {
         Category category = null;
-        if(!ObjectUtils.isEmpty(request.getCategory())) {
+        if (!ObjectUtils.isEmpty(request.getCategory())) {
             category = categoryRepository.findByName(request.getCategory())
                     .orElseThrow();
         }
         User user = User.builder()
-                        .username(username)
-                        .build();
+                .username(username)
+                .build();
 
         Thread thread = threadMapper.thread_threadCreateRequestDTO(request, username);
         thread.setUser(user);
@@ -73,31 +74,51 @@ public class ThreadService {
     }
 
     public ThreadListResponseDTO getThreads(ThreadGetRequest request, String username) {
-        PageRequest pageRequest = PageRequest.of(request.getPage(),
-                                                request.getPage_size(),
-                                            Sort.by("createdAt")
-                                                    .descending());
+        PageRequest pageRequest = null;
+
+        if (!ObjectUtils.isEmpty(request.getPage()) && !ObjectUtils.isEmpty(request.getPage_size())) {
+            pageRequest = PageRequest.of(request.getPage(), request.getPage_size());
+        }
+
+
+//        Sort.by("createdAt")
+//                .descending());
+//        pageRequest.withSort()
 
         List<Long> categoryIds = categoryRepository.findAllByNameIn(request.getCategories())
                 .stream().map(Category::getId).toList();
 
-        if(categoryIds.size() < request.getCategories().size()){
+        if (categoryIds.size() < request.getCategories().size()) {
             throw new NotFoundException(ErrorResponse
-                                            .<List<String>>builder()
-                                            .data(request.getCategories())
-                                            .message("Category invalid")
-                                            .build());
+                    .<List<String>>builder()
+                    .data(request.getCategories())
+                    .message("Category invalid")
+                    .build());
+        }
+        List<ThreadDTO> threads;
+        Sort sortOrder;
+
+        if(request.isNewest_first()){
+            sortOrder = Sort.by(Sort.Direction.DESC, "createdAt");
+        }else{
+            sortOrder = Sort.by(Sort.Direction.ASC, "createdAt");
         }
 
-
-        List<ThreadDTO> threads = threadRepository.findAllByCategoryIdIn(pageRequest, categoryIds)
-                .getContent()
-                .stream().map(threadMapper::thread_threadDTO_mapper)
-                .toList();
-
+        if (pageRequest != null) {
+            pageRequest = pageRequest.withSort(sortOrder);
+            threads = threadRepository.findAllByCategoryIdIn(pageRequest, categoryIds)
+                    .getContent()
+                    .stream().map(threadMapper::thread_threadDTO_mapper)
+                    .toList();
+        }else{
+            threads = threadRepository.findAllByCategoryIdIn(categoryIds, sortOrder)
+                    .stream().map(threadMapper::thread_threadDTO_mapper)
+                    .toList();
+        }
         return ThreadListResponseDTO.builder()
                 .threads(threads)
                 .build();
+
     }
 
     public void createPosts(PostCreateRequestListDTO request, String username) {
@@ -128,10 +149,10 @@ public class ThreadService {
                         .message("Category invalid")
                         .build()));
 
-        List<PostResponseDTO> posts = thread.getPosts()
-                                            .stream()
-                                            .map(postMapper::post_postresponseDTO_mapper)
-                                            .toList();
+        List<PostResponseDTO> posts = postRepository.findByThreadId(threadId)
+                .stream()
+                .map(postMapper::post_postresponseDTO_mapper)
+                .toList();
 
         return ThreadPostResponseDTO.builder()
                 .posts(posts)
@@ -144,6 +165,13 @@ public class ThreadService {
     }
 
     public void deleteThread(Long threadId) {
+        if(!threadRepository.findById(threadId).isPresent()){
+            throw new NotFoundException(ErrorResponse
+                    .<List<String>>builder()
+                    .data(Arrays.asList(String.valueOf(threadId)))
+                    .message("Thread not found")
+                    .build());
+        }
         threadRepository.deleteById(threadId);
     }
 }
