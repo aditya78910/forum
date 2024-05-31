@@ -1,5 +1,5 @@
 FROM gradle:8.7.0-jdk21 AS builder
-VOLUME gradle-cache:/home/gradle/.gradle
+VOLUME /home/gradle/.gradle
 VOLUME /tmp
 USER root
 ADD . /home/gradle/project
@@ -9,7 +9,6 @@ USER gradle
 RUN gradle bootJar
 #Start from a java:8
 RUN ls -l /home/gradle/project/build/libs
-RUN rm /home/gradle/project/build/libs/*plain*.jar
 RUN ls -l /home/gradle/project/build/libs
 RUN mv /home/gradle/project/build/libs/*.jar /home/gradle/project/app.jar
 EXPOSE 8080
