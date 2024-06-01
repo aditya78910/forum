@@ -40,7 +40,7 @@ public class UsernamePasswordAuthenticationFilter extends OncePerRequestFilter {
     @Autowired
     Validator validator;
 
-    private static final String LOGIN_ENDPOINT = "/login";
+    private static final String LOGIN_ENDPOINT = "/user/login";
     @Autowired
     private static final ObjectMapper objectMapper = new ObjectMapper();
 

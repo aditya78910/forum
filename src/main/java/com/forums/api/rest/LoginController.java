@@ -16,7 +16,7 @@ import java.time.Duration;
 
 @Slf4j
 @RestController
-@RequestMapping("/login")
+@RequestMapping("/user")
 @AllArgsConstructor
 public class LoginController {
 
@@ -24,9 +24,9 @@ public class LoginController {
 
     AuthMapper authMapper;
 
-    @PostMapping
+    @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> login(HttpServletResponse response, @AuthenticationPrincipal UserDTO userDTO){
-      
+
         Cookie cookie = new Cookie("session", authenticationService.createToken(userDTO));
         cookie.setHttpOnly(true);
         cookie.setSecure(true);

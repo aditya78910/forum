@@ -39,13 +39,13 @@ public class CategoriesController {
     }
 
     @DeleteMapping
-    public ResponseEntity<?> deleteThread(@RequestParam String category,
+    public ResponseEntity<?> deleteCategories(@RequestParam String category,
                                           @AuthenticationPrincipal UserDTO userDTO){
 
         validateRole(userDTO);
 
         categoryService.deleteCategory(category);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     private static void validateRole(UserDTO userDTO) {

@@ -123,11 +123,7 @@ public class ThreadService {
 
     public void createPosts(PostCreateRequestListDTO request, String username) {
         Thread thread = threadRepository.findById(request.getThreadId())
-                .orElseThrow(() -> new NotFoundException(ErrorResponse
-                        .<List<String>>builder()
-                        .data(Arrays.asList(String.valueOf(request.getThreadId())))
-                        .message("Category invalid")
-                        .build()));
+                .orElseThrow();
 
         User user = User.builder()
                 .username(username)
@@ -149,7 +145,7 @@ public class ThreadService {
                         .message("Category invalid")
                         .build()));
 
-        List<PostResponseDTO> posts = postRepository.findByThreadId(threadId)
+        List<PostResponseDTO> posts = postRepository.findByThreadId(threadId, Sort.by(Sort.Direction.ASC, "createdAt"))
                 .stream()
                 .map(postMapper::post_postresponseDTO_mapper)
                 .toList();
