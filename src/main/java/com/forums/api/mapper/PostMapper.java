@@ -10,7 +10,7 @@ public class PostMapper {
 
         return PostResponseDTO.builder()
                 .text(post.getText())
-                .author(post.getUser().getUsername())
+                .author(post.getUsername())
                 .createdAt(post.getCreatedAt())
                 .build();
 

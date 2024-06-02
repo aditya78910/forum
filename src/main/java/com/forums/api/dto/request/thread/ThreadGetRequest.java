@@ -14,4 +14,5 @@ public class ThreadGetRequest {
     private Integer page;
     private Integer page_size;
     private boolean newest_first;
+    private List<String> authors;
 }

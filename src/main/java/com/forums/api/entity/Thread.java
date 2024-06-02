@@ -36,8 +36,10 @@ public class Thread {
     @OnDelete(action = OnDeleteAction.CASCADE)
     private Category category;
 
-    @ManyToOne
-    @JoinColumn(name = "username")
-    @JsonManagedReference
-    private User user;
+    private String username;
+
+//    @ManyToOne
+//    @JoinColumn(name = "username")
+//    @JsonManagedReference
+//    private User user;
 }

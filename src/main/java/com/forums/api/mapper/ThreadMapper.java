@@ -20,7 +20,7 @@ public class ThreadMapper {
     public ThreadDTO thread_threadDTO_mapper(Thread thread){
         return ThreadDTO.builder()
                 .id(thread.getId())
-                .author(thread.getUser().getUsername())
+                .author(thread.getUsername())
                 .category(thread.getCategory().getName())
                 .createdAt(thread.getCreatedAt())
                 .title(thread.getTitle())

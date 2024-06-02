@@ -24,11 +24,14 @@ public class Post {
     @SequenceGenerator(name = "post_generator", sequenceName = "post_seq", allocationSize = 1, initialValue = 1)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "username")
-    @JsonManagedReference
-    private User user;
+    private String username;
 
+//    @ManyToOne
+//    @JoinColumn(name = "username")
+//    @JsonManagedReference
+//    private User user;
+
+    @Column(columnDefinition = "text")
     private String text;
 
     private Instant createdAt;

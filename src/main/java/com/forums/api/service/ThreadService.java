@@ -55,7 +55,7 @@ public class ThreadService {
                 .build();
 
         Thread thread = threadMapper.thread_threadCreateRequestDTO(request, username);
-        thread.setUser(user);
+        thread.setUsername(user.getUsername());
         thread.setCategory(category);
         Thread savedThread = threadRepository.save(thread);
         Post post = postDto_post_mapper(request.getOpeningPost().getText(), savedThread, user);
@@ -68,22 +68,14 @@ public class ThreadService {
         return Post.builder()
                 .text(text)
                 .thread(savedThread)
-                .user(user)
+                .username(user.getUsername())
                 .createdAt(Instant.now())
                 .build();
     }
 
     public ThreadListResponseDTO getThreads(ThreadGetRequest request, String username) {
-        PageRequest pageRequest = null;
 
-        if (!ObjectUtils.isEmpty(request.getPage()) && !ObjectUtils.isEmpty(request.getPage_size())) {
-            pageRequest = PageRequest.of(request.getPage(), request.getPage_size());
-        }
-
-
-//        Sort.by("createdAt")
-//                .descending());
-//        pageRequest.withSort()
+        //VALIDATION
 
         List<Long> categoryIds = categoryRepository.findAllByNameIn(request.getCategories())
                 .stream().map(Category::getId).toList();
@@ -95,7 +87,42 @@ public class ThreadService {
                     .message("Category invalid")
                     .build());
         }
+
+
+        List<ThreadDTO> threadDTOS = threadRepository.findThreadsByCriteria(request, categoryIds)
+                .stream().map(threadMapper::thread_threadDTO_mapper)
+                .toList();
+
+        return ThreadListResponseDTO.builder()
+                .threads(threadDTOS)
+                .build();
+    }
+    public ThreadListResponseDTO getThreadsBk(ThreadGetRequest request, String username) {
+
+        //VALIDATION
+
+        List<Long> categoryIds = categoryRepository.findAllByNameIn(request.getCategories())
+                .stream().map(Category::getId).toList();
+
+        if (categoryIds.size() < request.getCategories().size()) {
+            throw new NotFoundException(ErrorResponse
+                    .<List<String>>builder()
+                    .data(request.getCategories())
+                    .message("Category invalid")
+                    .build());
+        }
+
+
+
+        PageRequest pageRequest = null;
+
+
+        if (!ObjectUtils.isEmpty(request.getPage()) && !ObjectUtils.isEmpty(request.getPage_size())) {
+            pageRequest = PageRequest.of(request.getPage(), request.getPage_size());
+        }
+
         List<ThreadDTO> threads;
+
         Sort sortOrder;
 
         if(request.isNewest_first()){
@@ -154,7 +181,7 @@ public class ThreadService {
                 .posts(posts)
                 .title(thread.getTitle())
                 .id(thread.getId())
-                .author(thread.getUser().getUsername())
+                .author(thread.getUsername())
                 .createdAt(thread.getCreatedAt())
                 .category(thread.getCategory().getName())
                 .build();
