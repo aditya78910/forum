@@ -13,4 +13,5 @@ public class ThreadDTO {
     private String title;
     private String author;
     private Instant createdAt;
+    private String text;
 }

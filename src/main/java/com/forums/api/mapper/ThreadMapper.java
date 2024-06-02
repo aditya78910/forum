@@ -24,6 +24,7 @@ public class ThreadMapper {
                 .category(thread.getCategory().getName())
                 .createdAt(thread.getCreatedAt())
                 .title(thread.getTitle())
+                .text(thread.getText())
                 .build();
     }
 }
