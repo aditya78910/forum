@@ -30,6 +30,9 @@ public class Thread {
 
     private Instant createdAt;
 
+    @Column(columnDefinition = "text")
+    private String text;
+
     @ManyToOne
     @JoinColumn(name = "category_id")
     @JsonManagedReference
@@ -38,8 +41,4 @@ public class Thread {
 
     private String username;
 
-//    @ManyToOne
-//    @JoinColumn(name = "username")
-//    @JsonManagedReference
-//    private User user;
 }

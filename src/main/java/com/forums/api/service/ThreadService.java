@@ -57,11 +57,8 @@ public class ThreadService {
         Thread thread = threadMapper.thread_threadCreateRequestDTO(request, username);
         thread.setUsername(user.getUsername());
         thread.setCategory(category);
-        Thread savedThread = threadRepository.save(thread);
-        Post post = postDto_post_mapper(request.getOpeningPost().getText(), savedThread, user);
-
-        postRepository.save(post);
-
+        thread.setText(request.getOpeningPost().getText());
+        threadRepository.save(thread);
     }
 
     private static Post postDto_post_mapper(String text, Thread savedThread, User user) {
