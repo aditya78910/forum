@@ -3,27 +3,22 @@ package com.forums.api.security;
 import com.forums.api.dto.response.authentication.UserDTO;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.web.authentication.preauth.PreAuthenticatedAuthenticationToken;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Optional;
-import java.util.stream.Stream;
+import java.util.Collections;
 
 @Component
-public class CookieAuthenticationFilter extends OncePerRequestFilter {
-    private static final String COOKIE_NAME = "session";
-
+public class TokenAuthenticationFilter extends OncePerRequestFilter {
     @Value("${ADMIN_API_KEY}")
     private String apiKey;
 
@@ -32,21 +27,17 @@ public class CookieAuthenticationFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        Optional<Cookie> cookieAuth = Stream.of(Optional.ofNullable(request.getCookies()).orElse(new Cookie[0]))
-                .filter(cookie -> COOKIE_NAME.equals(cookie.getName()))
-                .findFirst();
+        String tokenHeader = request.getHeader("Token");
 
-        if (cookieAuth.isPresent()) {
-            PreAuthenticatedAuthenticationToken authentication =
-                    new PreAuthenticatedAuthenticationToken(cookieAuth.get().getValue(), null);
+        if(!ObjectUtils.isEmpty(tokenHeader) && tokenHeader.equals(apiKey)){
+            UserDTO userDto = UserDTO.builder()
+                    .username("TEST_USER")
+                    .email("TEST_EMAIL@gmail.com")
+                    .roles(Arrays.asList("admin"))
+                    .build();
+            UsernamePasswordAuthenticationToken authenticated =
+                    new UsernamePasswordAuthenticationToken(userDto, null, Collections.emptyList());
 
-            String tokenHeader = request.getHeader("Token");
-
-            UsernamePasswordAuthenticationToken authenticated = (UsernamePasswordAuthenticationToken)customAuthenticationManager.authenticate(authentication);
-            UserDTO principal = (UserDTO)authenticated.getPrincipal();
-            if( !ObjectUtils.isEmpty(tokenHeader) && tokenHeader.equals(apiKey)){
-                principal.setRoles(Arrays.asList("admin"));
-            }
             SecurityContextHolder.getContext().setAuthentication(authenticated);
         }
 

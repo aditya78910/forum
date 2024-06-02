@@ -26,12 +26,16 @@ public class Config {
     CookieAuthenticationFilter cookieAuthenticationFilter;
 
     @Autowired
+    TokenAuthenticationFilter tokenAuthenticationFilter;
+
+    @Autowired
     UsernamePasswordAuthenticationFilter usernamePasswordAuthenticationFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-                .addFilterBefore(usernamePasswordAuthenticationFilter, BasicAuthenticationFilter.class)
+                .addFilterBefore(tokenAuthenticationFilter, BasicAuthenticationFilter.class)
+                .addFilterBefore(usernamePasswordAuthenticationFilter, TokenAuthenticationFilter.class)
                 .addFilterBefore(cookieAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .csrf(AbstractHttpConfigurer::disable)
 
